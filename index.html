@@ -8,7 +8,7 @@
 <header class="top"><h1>勤務希望入力（職員用）</h1></header>
 <main class="wrap">
 <section class="panel"><p class="intro">氏名と対象月を入力し、希望がある日だけ勤務内容を選んでください。入力内容はこのスマホのブラウザー内へ自動保存されます。後日開いたときは「前回の続きから」を押してください。</p><div class="basic"><div class="field"><label for="employeeName">氏名（勤務表と同じ表記）</label><input id="employeeName" autocomplete="name" placeholder="例：山田 太郎"></div><div class="field"><label for="month">対象月</label><input id="month" type="month"></div></div></section>
-<section class="panel"><h2 class="sectiontitle">勤務希望を入力</h2><div id="calendar" class="calendar"></div><p class="note">「希望なし」は提出対象になりません。「日勤希望」は空白の日勤として固定されます。夜勤希望は管理者側で職員の性別に合わせてAまたはBになります。</p></section>
+<section class="panel"><h2 class="sectiontitle">勤務希望を入力</h2><div id="calendar" class="calendar"></div><p class="note">「希望なし」に戻した日は、前回提出した希望の取消として送信されます。「日勤希望」は空白の日勤として固定されます。夜勤希望は管理者側で職員の性別に合わせてAまたはBになります。</p></section>
 <div class="actions"><span id="count" class="count">希望 0件 <small id="savedStatus" class="saved"></small></span><button class="btn" id="restoreBtn" disabled>前回の続きから</button><button class="btn" id="clearBtn">入力を消去</button><button class="btn primary" id="saveBtn">途中保存</button><button class="btn send" id="sendBtn">管理者へ送信</button></div>
 </main>
 <script>
