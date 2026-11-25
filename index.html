@@ -32,7 +32,12 @@
 </dialog>
 <script>
 const $=s=>document.querySelector(s),calendar=$('#calendar'),month=$('#month'),nameInput=$('#employeeName'),count=$('#count'),restoreBtn=$('#restoreBtn'),savedStatus=$('#savedStatus'),DRAFT_KEY='shift_request_mobile_draft_v1',SUBMITTED_KEY='shift_request_submitted_v1',SCRIPT_URL='https://script.google.com/macros/s/AKfycbxvi864Y9tQCMGWMU1jmC9jq-xrGXOXZfy6T2BHzGQ9hK8gZE86_JAzQxaXQicAUK_r/exec';
-month.value=new Date().toISOString().slice(0,7);
+function nextRequestMonth(today=new Date()){
+  const year=today.getFullYear();
+  const monthIndex=today.getMonth()+1;
+  return `${year+Math.floor(monthIndex/12)}-${String(monthIndex%12+1).padStart(2,'0')}`;
+}
+month.value=nextRequestMonth();
 let choices=[['','希望なし'],['公休','公休'],['有給','有給'],['日勤','日勤希望'],['夜勤','夜勤希望'],['夜勤明け','夜勤明け'],['半休前半','半休（前半）'],['半休後半','半休（後半）'],['研修','研修'],['出張','出張']];
 async function loadChoices(){try{const response=await fetch(`勤務希望入力候補.json?v=${Date.now()}`,{cache:'no-store'});if(!response.ok)throw new Error();const config=await response.json();if(config.version==='shift-request-options-v1'&&Array.isArray(config.choices)&&config.choices.length)choices=config.choices}catch(e){}render()}
 function days(){return new Date(+month.value.slice(0,4),+month.value.slice(5,7),0).getDate()}
