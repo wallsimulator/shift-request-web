@@ -64,11 +64,10 @@ function showSubmissionReview(data){
     grid.append(header);
   }
   for(let i=0;i<new Date(year,monthNumber-1,1).getDay();i++)grid.append(document.createElement('span'));
-  const changes=new Map(data.requests.map(request=>[request.day,request]));
   const notes=new Map(draftData().requests.map(request=>[request.day,request.note]));
   for(let day=1;day<=days();day++){
-    const symbol=changes.get(day)?.symbol;
-    const noteText=(symbol||!data.currentRequests[day])?notes.get(day):'';
+    const symbol=data.currentRequests[day]?.symbol;
+    const noteText=notes.get(day);
     const cell=document.createElement('div');
     cell.className='review-day'+(symbol||noteText?' marked':'');
     cell.textContent=day;
@@ -84,7 +83,7 @@ function showSubmissionReview(data){
     }
     grid.append(cell);
   }
-  $('#reviewSummary').textContent='再提出では今回変更した勤務希望を表示しています。備考のみの日は確認画面に表示し、送信には含めません。';
+  $('#reviewSummary').textContent='現在の入力内容を全日分表示しています。再提出では前回からの変更が反映されます。備考だけの日は管理者に届きません。';
   reviewedSubmission=data;
   reviewDialog.showModal();
 }
