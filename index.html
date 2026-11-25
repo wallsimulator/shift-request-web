@@ -64,27 +64,27 @@ function showSubmissionReview(data){
     grid.append(header);
   }
   for(let i=0;i<new Date(year,monthNumber-1,1).getDay();i++)grid.append(document.createElement('span'));
-  const previous=submittedStore()[submissionKey()]||{};
   const changes=new Map(data.requests.map(request=>[request.day,request]));
+  const notes=new Map(draftData().requests.map(request=>[request.day,request.note]));
   for(let day=1;day<=days();day++){
-    const entry=data.currentRequests[day];
-    const cancelled=changes.get(day)?.action==='clear'&&previous[day]?.symbol;
+    const symbol=changes.get(day)?.symbol;
+    const noteText=(symbol||!data.currentRequests[day])?notes.get(day):'';
     const cell=document.createElement('div');
-    cell.className='review-day'+(entry||cancelled?' marked':'');
+    cell.className='review-day'+(symbol||noteText?' marked':'');
     cell.textContent=day;
-    if(entry||cancelled){
-      const symbol=document.createElement('b');
-      symbol.textContent=entry?.symbol||(cancelled?'取消':'');
-      cell.append(symbol);
-      if(entry?.note){
-        const note=document.createElement('p');
-        note.textContent=entry.note;
-        cell.append(note);
-      }
+    if(symbol){
+      const mark=document.createElement('b');
+      mark.textContent=symbol;
+      cell.append(mark);
+    }
+    if(noteText){
+      const note=document.createElement('p');
+      note.textContent=noteText;
+      cell.append(note);
     }
     grid.append(cell);
   }
-  $('#reviewSummary').textContent='再提出では変更・取消が反映されます。備考は勤務希望を選んだ日に送信されます。';
+  $('#reviewSummary').textContent='再提出では今回変更した勤務希望を表示しています。備考のみの日は確認画面に表示し、送信には含めません。';
   reviewedSubmission=data;
   reviewDialog.showModal();
 }
