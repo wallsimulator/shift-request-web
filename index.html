@@ -4,6 +4,17 @@
 <style>
 :root{--brand:#176b5b;--brand2:#e7f3ef;--ink:#18312d;--muted:#657873;--line:#d6e2de;--bg:#f3f6f4}*{box-sizing:border-box}html,body{width:100%;max-width:100%;overflow-x:hidden}body{margin:0;background:var(--bg);color:var(--ink);font-family:"Yu Gothic UI","Noto Sans JP",system-ui,sans-serif}.top{background:#173d36;color:#fff;padding:18px}.top h1{max-width:1000px;margin:auto;font-size:22px}.wrap{width:100%;max-width:1000px;margin:auto;padding:18px}.panel{width:100%;min-width:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}.sectiontitle{font-size:17px;margin:0 0 12px}.intro{color:var(--muted);line-height:1.7;margin-top:0}.basic{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:14px}.field{display:flex;min-width:0;flex-direction:column;gap:6px}.field label{font-size:13px;font-weight:800}.field input,.day select,.day input{width:100%;min-width:0;max-width:100%;border:1px solid var(--line);border-radius:8px;padding:10px;font:inherit}.calendar{width:100%;min-width:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.day{min-width:0;border:1px solid var(--line);border-radius:11px;padding:10px;background:#fff}.day.weekend{background:#fff8f8}.date{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:800}.date span{font-size:12px;color:var(--muted)}.day input{margin-top:7px;font-size:12px}.actions{position:sticky;bottom:0;display:flex;gap:10px;justify-content:flex-end;background:#ffffffed;border:1px solid var(--line);border-radius:12px;padding:12px;box-shadow:0 -3px 18px #0001}.btn{min-height:44px;border:1px solid var(--line);background:#fff;border-radius:9px;padding:11px 16px;font-weight:800;cursor:pointer}.btn:disabled{opacity:.45;cursor:default}.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}.count{margin-right:auto;align-self:center;color:var(--muted);font-size:13px}.saved{display:block;color:var(--brand);font-weight:700;margin-top:2px}.note{font-size:12px;color:var(--muted);line-height:1.6}@media(max-width:760px){.basic{grid-template-columns:minmax(0,1fr)}.calendar{grid-template-columns:repeat(2,minmax(0,1fr))}.wrap{padding:10px}.actions{justify-content:stretch;flex-wrap:wrap}.actions .btn{flex:1;min-width:30%}.count{width:100%;margin:0;display:block}.saved{display:inline;margin-left:8px}}@media(max-width:600px){.top{padding:12px}.top h1{font-size:18px}.wrap{padding:8px}.panel{padding:12px;border-radius:10px;margin-bottom:10px}.intro{font-size:13px;line-height:1.55}.calendar{display:block}.day{display:grid;grid-template-columns:58px minmax(0,1fr);gap:8px;align-items:center;margin-bottom:8px;padding:8px}.date{grid-row:1/3;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;margin:0;line-height:1.25}.day input{margin:0}.note{margin-bottom:0}.actions{position:static;display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px}.count{grid-column:1/-1}.actions .btn{width:100%;min-width:0;padding:10px 6px;font-size:13px}.actions .btn.primary{grid-column:1/-1}.saved{display:block;margin:2px 0 0}.sectiontitle{font-size:16px}}
 .btn.send{background:#245f9b;border-color:#245f9b;color:#fff}@media(max-width:600px){.actions .btn.send{grid-column:1/-1}.actions .btn.primary{grid-column:auto}}
+#reviewDialog{width:min(680px,calc(100% - 16px));max-height:92dvh;overflow:auto;border:1px solid var(--line);border-radius:14px;padding:12px;color:var(--ink)}
+#reviewDialog::backdrop{background:#173d3677}
+#reviewDialog h2{margin:0 0 6px}
+.review-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line)}
+.review-grid>*{min-width:0;background:white;padding:4px;overflow-wrap:anywhere}
+.review-grid>strong{text-align:center;background:#e7f3ef}
+.review-day{min-height:46px;font-size:12px}
+.review-day.marked{background:#e7f3ef}
+.review-day b{display:block;text-align:center;font-size:16px}
+.review-day p{margin:3px 0 0;white-space:pre-wrap}
+.review-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:12px}
 </style></head><body>
 <header class="top"><h1>勤務希望入力（職員用）</h1></header>
 <main class="wrap">
@@ -11,6 +22,14 @@
 <section class="panel"><h2 class="sectiontitle">勤務希望を入力</h2><div id="calendar" class="calendar"></div><p class="note">「希望なし」に戻した日は、前回提出した希望の取消として送信されます。「日勤希望」は空白の日勤として固定されます。夜勤希望は管理者側で職員の性別に合わせてAまたはBになります。</p></section>
 <div class="actions"><span id="count" class="count">希望 0件 <small id="savedStatus" class="saved"></small></span><button class="btn" id="restoreBtn" disabled>前回の続きから</button><button class="btn" id="clearBtn">入力を消去</button><button class="btn primary" id="saveBtn">途中保存</button><button class="btn send" id="sendBtn">管理者へ送信</button></div>
 </main>
+<dialog id="reviewDialog" aria-labelledby="reviewTitle">
+  <h2 id="reviewTitle">送信内容の確認</h2>
+  <p>この内容を管理者に送信します。</p>
+  <h3 id="reviewMonth"></h3>
+  <div id="reviewGrid" class="review-grid"></div>
+  <p class="note" id="reviewSummary"></p>
+  <div class="review-actions"><button type="button" class="btn" id="reviewBack">入力に戻る</button><button type="button" class="btn send" id="reviewSend">この内容で送信</button></div>
+</dialog>
 <script>
 const $=s=>document.querySelector(s),calendar=$('#calendar'),month=$('#month'),nameInput=$('#employeeName'),count=$('#count'),restoreBtn=$('#restoreBtn'),savedStatus=$('#savedStatus'),DRAFT_KEY='shift_request_mobile_draft_v1',SUBMITTED_KEY='shift_request_submitted_v1',SCRIPT_URL='https://script.google.com/macros/s/AKfycbxvi864Y9tQCMGWMU1jmC9jq-xrGXOXZfy6T2BHzGQ9hK8gZE86_JAzQxaXQicAUK_r/exec';
 month.value=new Date().toISOString().slice(0,7);
@@ -32,7 +51,74 @@ function restoreDraft(){const draft=readDraft();if(!draft)return alert('前回�
 calendar.addEventListener('input',()=>{updateCount();autoSave()});nameInput.addEventListener('input',autoSave);month.addEventListener('change',()=>{render();autoSave()});restoreBtn.onclick=restoreDraft;
 $('#clearBtn').onclick=()=>{if(!confirm('入力した勤務希望と、この端末の自動保存データをすべて消去しますか？'))return;clearTimeout(saveTimer);nameInput.value='';document.querySelectorAll('[data-symbol]').forEach(x=>x.value='');document.querySelectorAll('[data-note]').forEach(x=>x.value='');try{localStorage.removeItem(DRAFT_KEY)}catch(e){}restoreBtn.disabled=true;savedStatus.textContent='';updateCount()};
 $('#saveBtn').onclick=()=>{try{clearTimeout(saveTimer);const draft=draftData();localStorage.setItem(DRAFT_KEY,JSON.stringify(draft));restoreBtn.disabled=false;savedStatus.textContent=`途中保存済み ${new Date(draft.savedAt).toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'})}`;alert('この端末に途中保存しました。\nスプレッドシートには送信していません。')}catch(e){alert('この端末に保存できませんでした。ブラウザーの設定をご確認ください。')}};
-$('#sendBtn').onclick=async()=>{const data=submissionData();if(!data.employeeName)return alert('氏名を入力してください。');if(!data.requests.length)return alert('前回の送信内容から変更された勤務希望はありません。');if(SCRIPT_URL.startsWith('__'))return alert('送信機能は現在設定中です。途中保存をご利用ください。');if(!confirm(`${data.month}の勤務希望を管理者へ送信しますか？\n変更・取消 ${data.requests.length}件`))return;const button=$('#sendBtn'),original=button.textContent;button.disabled=true;button.textContent='送信中…';try{await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});try{rememberSubmission(data);localStorage.setItem(DRAFT_KEY,JSON.stringify({...draftData(),submittedAt:data.submittedAt}))}catch(e){}savedStatus.textContent='管理者へ送信済み';alert('変更・取消内容を送信しました。管理者用スプレッドシートへ保存されます。')}catch(e){alert('送信できませんでした。通信状態を確認し、もう一度お試しください。')}finally{button.disabled=false;button.textContent=original}};
+const reviewDialog=$('#reviewDialog'),reviewSend=$('#reviewSend'),reviewBack=$('#reviewBack');
+let reviewedSubmission;
+function showSubmissionReview(data){
+  const [year,monthNumber]=data.month.split('-').map(Number);
+  $('#reviewMonth').textContent=`${year}年${monthNumber}月　${data.employeeName}`;
+  const grid=$('#reviewGrid');
+  grid.replaceChildren();
+  for(const weekday of '日月火水木金土'){
+    const header=document.createElement('strong');
+    header.textContent=weekday;
+    grid.append(header);
+  }
+  for(let i=0;i<new Date(year,monthNumber-1,1).getDay();i++)grid.append(document.createElement('span'));
+  const previous=submittedStore()[submissionKey()]||{};
+  const changes=new Map(data.requests.map(request=>[request.day,request]));
+  for(let day=1;day<=days();day++){
+    const entry=data.currentRequests[day];
+    const cancelled=changes.get(day)?.action==='clear'&&previous[day]?.symbol;
+    const cell=document.createElement('div');
+    cell.className='review-day'+(entry||cancelled?' marked':'');
+    cell.textContent=day;
+    if(entry||cancelled){
+      const symbol=document.createElement('b');
+      symbol.textContent=entry?.symbol||(cancelled?'取消':'');
+      cell.append(symbol);
+      if(entry?.note){
+        const note=document.createElement('p');
+        note.textContent=entry.note;
+        cell.append(note);
+      }
+    }
+    grid.append(cell);
+  }
+  $('#reviewSummary').textContent='再提出では変更・取消が反映されます。備考は勤務希望を選んだ日に送信されます。';
+  reviewedSubmission=data;
+  reviewDialog.showModal();
+}
+$('#sendBtn').onclick=()=>{
+  if(!nameInput.value.trim())return alert('氏名を入力してください。');
+  if(!month.value||!calendar.querySelector('.day'))return alert('対象月と入力欄を確認してください。');
+  const data=submissionData();
+  if(!data.requests.length)return alert('前回の送信内容から変更された勤務希望はありません。');
+  if(SCRIPT_URL.startsWith('__'))return alert('送信機能は現在設定中です。途中保存をご利用ください。');
+  showSubmissionReview(data);
+};
+reviewBack.onclick=()=>reviewDialog.close();
+reviewDialog.addEventListener('cancel',event=>{if(reviewSend.disabled)event.preventDefault()});
+reviewSend.onclick=async()=>{
+  if(reviewSend.disabled||!reviewedSubmission)return;
+  const data={...reviewedSubmission,submittedAt:new Date().toISOString()};
+  reviewSend.disabled=reviewBack.disabled=true;
+  reviewSend.textContent='送信中…';
+  try{
+    await fetch(SCRIPT_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(data)});
+    try{
+      rememberSubmission(data);
+      localStorage.setItem(DRAFT_KEY,JSON.stringify({...draftData(),submittedAt:data.submittedAt}));
+    }catch(e){}
+    reviewDialog.close();
+    savedStatus.textContent='管理者へ送信済み';
+    alert('送信リクエストを送信しました。');
+  }catch(e){
+    alert('送信できませんでした。通信状態を確認し、もう一度お試しください。');
+  }finally{
+    reviewSend.disabled=reviewBack.disabled=false;
+    reviewSend.textContent='この内容で送信';
+  }
+};
 loadChoices();const existingDraft=readDraft();restoreBtn.disabled=!existingDraft;if(existingDraft?.savedAt)savedStatus.textContent=`前回保存 ${new Date(existingDraft.savedAt).toLocaleString('ja-JP')}`;
 </script></body></html>
 
